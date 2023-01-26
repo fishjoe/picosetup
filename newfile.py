@@ -97,7 +97,7 @@ class WebPage:
         self.html_default = html
         pass
 
-###### 1.2.3.2 Make the html string for hosing the page.
+###### 1.2.3.2 Make and process the html code as string, for hosing the page. 
     def make_page(self):
         varibles_itr = []
         btn_itr = []
@@ -210,8 +210,11 @@ def update_mip():
 
 def update_config(dic): # update json file
     with open("config.json", "w") as config:
-        json.dump(dic, config)
+        json.dump(dic, config_file_name)
     
+###### 1.2.6 function to connect wifi.
+
+
 
 
 #####2. **Access Point Mode:** It will then run into Access Point mode to create a setup page with following credentials. 
@@ -369,7 +372,8 @@ if config_file_name not in os.listdir(): # if "config.json" exsits.....
 ###### This following function will return the above key info. function is at ###### 1.2.3 (serch keyword 1.2.3)
     page = WebPage(server, default_page, ssid = "", password = "", static_ip = "Leave Empty for DHCP")
     returnvalue = page.webpage()
-    config(returnvalue[0])
+    print(returnvalue[0])
+    update_config(returnvalue[0])
     reset_feedback = Feedback(f"Reset in 5 Secs", 5, .2, .8)
     reset_feedback.feedback()
     
