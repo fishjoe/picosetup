@@ -133,7 +133,7 @@ class WebPage:
         keydic = {}
         keylist = self.kwargs.keys()
 #         print([key for key in keylist])
-        li = UTF8_decoded_request_str.lower().split("\n")
+        li = UTF8_decoded_request_str.split("\n")
         rgx = "web_key_|:| |\'|\""
         for line in li:
             if "web_key_" in line:
@@ -209,8 +209,8 @@ def update_mip():
 ###### 1.2.5 function to save ssid/password and static_ip setting into config.json.
 
 def update_config(dic): # update json file
-    with open("config.json", "w") as config:
-        json.dump(dic, config_file_name)
+    with open(config_file_name, "w") as config:
+        json.dump(dic, config)
     
 ###### 1.2.6 function to connect wifi.
 
@@ -389,6 +389,9 @@ if config_file_name not in os.listdir(): # if "config.json" exsits.....
 #####3. **Normal Mode:** connect to wifi
 else: # Calls Normal Mode when "config.json" exists.
 ######* 3.1 Future Update: inside "config.json", a key would indicate if needed to update firmware and or packages. Then the function will be called depends.
+    with open(config_file_name, "r") as config:
+        pass
+    
     pass
 
 
