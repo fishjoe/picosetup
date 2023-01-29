@@ -614,7 +614,6 @@ else: # Calls Normal Mode when "config.json" exists.
 
 def testing_url(url):
     target_ip = url.split("//")[1].split(":")[0]
-    print(target_ip)
     ping_result = ping(target_ip, quiet=True)
     if int(ping_result[0])*int(ping_result[1])==0:
         return False
