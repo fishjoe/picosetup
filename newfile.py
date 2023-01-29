@@ -27,7 +27,7 @@ import json
 ####Functions it will do at start up:
 #####1. **Initial Check:** 
 ###### It will check if wifi was set up, by checking the existence of configfile called "config.json" --> if yes --> 3. **Normal Mode** else 2. **Access Point Mode**
-static_ip = '192.168.1.99'
+static_ip = '192.168.1.98'
 config_file_name = "config.json" # *(you may change this value to what ever you want.)*
 
 ###### 1.1 It will also create essential objects and functions as a part of UI indication, especially when Pico is not connected to computer.
