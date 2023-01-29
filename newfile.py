@@ -27,7 +27,7 @@ import json
 ####Functions it will do at start up:
 #####1. **Initial Check:** 
 ###### It will check if wifi was set up, by checking the existence of configfile called "config.json" --> if yes --> 3. **Normal Mode** else 2. **Access Point Mode**
-
+static_ip = '192.168.1.99'
 config_file_name = "config.json" # *(you may change this value to what ever you want.)*
 
 ###### 1.1 It will also create essential objects and functions as a part of UI indication, especially when Pico is not connected to computer.
@@ -37,10 +37,12 @@ led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gp
 
 ###### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
 class Feedback: # feedback attribute may include print_string
-    def __init__(self, print_string, blink_numbers, blink_length, blind_length, led_gpio = None, sould_gpio = None) -> None:
+    def __init__(self, print_string, blink_numbers, blink_length, blind_length, print_sep=" ", print_end= "\r", led_gpio = None, sould_gpio = None) -> None:
         self.led_gpio = led_gpio if led_gpio else machine.Pin('LED', machine.Pin.OUT) # Default feedback led is onboard led however you may connect other devices as feedback.
         self.sound_gpio = sould_gpio # By default feedback sound is not active.
         self.print_string = print_string # message to return to user.
+        self.print_end = print_end
+        self.print_sep = print_sep
         self.blink_numbers = blink_numbers # how many blinks needed as indication.
         self.blink_length = blink_length # how long the led is on
         self.blind_length = blind_length # how long the led is off
@@ -79,7 +81,7 @@ class Feedback: # feedback attribute may include print_string
 
     def print_feedback(self):
         # may improve later.
-        print(self.print_string)
+        print(self.print_string, sep = self.print_sep, end= self.print_end)
         pass
 
 ###### 1.2.2.1 TODO instances of feedback methods.
@@ -145,7 +147,7 @@ class WebPage:
                 pair = line.split(":")
                 pair = [i.strip().replace("\r", "") for i in pair]
                 print(pair)
-                key, value = pair[0], pair[1]
+                key, value = pair[0].lower(), pair[1]
 #                 print(f"this line -------- {line}")
 #                 print(line.split(":"))
                 keydic[key] = value
@@ -164,7 +166,7 @@ class WebPage:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(host)
         s.listen(1)
-        webpage_feedback = Feedback(f"Listening on: {host}", 0, 0, 0)
+        webpage_feedback = Feedback(f"\nListening on: {host}", 0, 0, 0)
         webpage_feedback.feedback()
         x = 0
         while True:
@@ -214,6 +216,196 @@ def update_config(dic): # update json file
     
 ###### 1.2.6 function to connect wifi.
 
+def wifi_connection(ssid, psd, isAp=False, isStatic=True, iptp=(static_ip, '255.255.255.0', '192.168.1.254', '8.8.8.8')): # Keys may include ssid, password, isAP, isStatic, staticIPPresetTuple)
+    count_on_attempts=0
+    if isAp:
+        isStatic = False
+        wifi = network.WLAN(network.AP_IF)
+        wifi.config(essid=ssid, password=psd)
+        wifi.active(True)
+        iptp=wifi.ifconfig()
+        if wifi.isconnected():
+            Feedback(f"Access Point is ready at {iptp[0]}, SSID : {ssid}, Password : {psd}", 0, 0, 0).feedback()
+            time.sleep(.5)
+            return wifi
+        # access point is ready
+    else:
+        wifi = network.WLAN(network.STA_IF)
+        Feedback("", 3, .1, .1).feedback()
+        while True:
+            if isStatic:
+                wifi.ifconfig(iptp)
+            wifi.active(True)
+            wifi.connect(ssid, psd)
+            count_on_attempts += 1
+            if count_on_attempts == 10:
+                Feedback(f"too many fails, please check settings or repair corrupted file", 10 , .2, .3).feedback()
+                sys.exit()
+#             print(count_on_attempts, "attempts")
+#             print("network.status()code : ", wifi.status())
+#             print("network.isconnected() : ", wifi.isconnected())
+            print(".", end="", sep="")
+            time.sleep(0.5)
+            Feedback(f"too many fails, please check settings or repair corrupted file", count_on_attempts , .2, .3).feedback()
+            ip = iptp[0] if not isStatic else wifi.ifconfig()[0]
+            # print(wifi.isconnected()*bool(wifi.status()==3)*bool(wifi.ifconfig()[0]==iptp[0]))
+#             print(ip)
+
+            if all(
+                    [
+                        wifi.isconnected(),
+                        wifi.status() == 3,
+                        wifi.ifconfig()[0] == iptp[0]
+                    ]
+            ):
+                # Wifi has problem sometimes, so I use "uping" to test and internal machine and an external site for
+                # connection. uping module has been loaded in this file. I'm not using it for any comercial process. this is only
+                # for learning.
+                print("\nConnection Established")
+                try:
+                    print("Pinging an internal machine......", end="")
+                    internal_result = ping(wifi.ifconfig()[3], quiet=True)[1]
+                    led_blink(4, 0.1, 0.1)
+                    print(internal_result, "/ 4  Done")
+                    print("Pinging an external site......", end="")
+                    external_result = ping("google.com", quiet=True)[1]
+                    print(external_result, "/ 4  Done")
+                except:
+                    internal_result=external_result=0
+                    pass
+                if internal_result * external_result == 0:
+                    print("Wifi not working,retry.....")
+                    led_blink(5, 1, 1)
+                else:
+                    print("WIFI connection succesfull")
+                    break
+        return wifi
+
+###### 1.2.7 PINGing function from thirdparty.
+
+# ----------------------------------------- including Olav Morken's "uping" ---------------------------
+# ----------------------------------------- for learning purpose only ---------------------------
+
+# µPing (MicroPing) for MicroPython
+# copyright (c) 2018 Shawwwn <shawwwn1@gmail.com>
+# License: MIT
+
+# Internet Checksum Algorithm
+# Author: Olav Morken
+# https://github.com/olavmrk/python-ping/blob/master/ping.py
+# @data: bytes
+def checksum(data):
+    if len(data) & 0x1:  # Odd number of bytes
+        data += b"\0"
+    cs = 0
+    for pos in range(0, len(data), 2):
+        b1 = data[pos]
+        b2 = data[pos + 1]
+        cs += (b1 << 8) + b2
+    while cs >= 0x10000:
+        cs = (cs & 0xFFFF) + (cs >> 16)
+    cs = ~cs & 0xFFFF
+    return cs
+
+
+def ping(host, count=4, timeout=5000, interval=10, quiet=False, size=64):
+    import utime
+    import uselect
+    import uctypes
+    import usocket
+    import ustruct
+    import urandom
+
+    # prepare packet
+    assert size >= 16, "pkt size too small"
+    pkt = b"Q" * size
+    pkt_desc = {
+        "type": uctypes.UINT8 | 0,
+        "code": uctypes.UINT8 | 1,
+        "checksum": uctypes.UINT16 | 2,
+        "id": uctypes.UINT16 | 4,
+        "seq": uctypes.INT16 | 6,
+        "timestamp": uctypes.UINT64 | 8,
+    }  # packet header descriptor
+    h = uctypes.struct(uctypes.addressof(pkt), pkt_desc, uctypes.BIG_ENDIAN)
+    h.type = 8  # ICMP_ECHO_REQUEST
+    h.code = 0
+    h.checksum = 0
+    h.id = urandom.randint(0, 65535)
+    h.seq = 1
+
+    # init socket
+    sock = usocket.socket(usocket.AF_INET, usocket.SOCK_RAW, 1)
+    sock.setblocking(0)
+    sock.settimeout(timeout / 1000)
+    addr = usocket.getaddrinfo(host, 1)[0][-1][0]  # ip address
+    sock.connect((addr, 1))
+    not quiet and print("PING %s (%s): %u data bytes" % (host, addr, len(pkt)))
+
+    seqs = list(range(1, count + 1))  # [1,2,...,count]
+    c = 1
+    t = 0
+    n_trans = 0
+    n_recv = 0
+    finish = False
+    while t < timeout:
+        if t == interval and c <= count:
+            # send packet
+            h.checksum = 0
+            h.seq = c
+            h.timestamp = utime.ticks_us()
+            h.checksum = checksum(pkt)
+            if sock.send(pkt) == size:
+                n_trans += 1
+                t = 0  # reset timeout
+            else:
+                seqs.remove(c)
+            c += 1
+
+        # recv packet
+        while 1:
+            socks, _, _ = uselect.select([sock], [], [], 0)
+            if socks:
+                resp = socks[0].recv(4096)
+                resp_mv = memoryview(resp)
+                h2 = uctypes.struct(
+                    uctypes.addressof(resp_mv[20:]), pkt_desc, uctypes.BIG_ENDIAN
+                )
+                # TODO: validate checksum (optional)
+                seq = h2.seq
+                if (
+                    h2.type == 0 and h2.id == h.id and (seq in seqs)
+                ):  # 0: ICMP_ECHO_REPLY
+                    t_elasped = (utime.ticks_us() - h2.timestamp) / 1000
+                    ttl = ustruct.unpack("!B", resp_mv[8:9])[0]  # time-to-live
+                    n_recv += 1
+                    not quiet and print(
+                        "%u bytes from %s: icmp_seq=%u, ttl=%u, time=%f ms"
+                        % (len(resp), addr, seq, ttl, t_elasped)
+                    )
+                    seqs.remove(seq)
+                    if len(seqs) == 0:
+                        finish = True
+                        break
+            else:
+                break
+
+        if finish:
+            break
+
+        utime.sleep_ms(1)
+        t += 1
+
+    # close
+    sock.close()
+    ret = (n_trans, n_recv)
+    not quiet and print(
+        "%u packets transmitted, %u packets received" % (n_trans, n_recv)
+    )
+    return (n_trans, n_recv)
+
+
+# ----------------------------------------- "uping" end  ---------------------------------------------
 
 
 
@@ -228,9 +420,11 @@ if config_file_name not in os.listdir(): # if "config.json" exsits.....
     
 ###### Setup Access Point if suceed, led indicator would remain on untill user connect to the page.
 ###### If it fails, it means either the settings or the board has problem. it would blink 4 times in 2 seconds.    
-    ap = network.WLAN(network.AP_IF)
-    ap.config(essid=ap_ssid, password=ap_psd)
-    ap.active(True)
+
+    
+    ap = wifi_connection(ap_ssid, ap_psd, True)
+    mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+#     print(mac)
     if ap.isconnected():
         print_str = f"Access Point is ready at {ap.ifconfig()[0]}, SSID : {ap_ssid}, Password : {ap_psd}"
         qty, on, off = 0,0,0 # turn the led on
@@ -390,8 +584,31 @@ if config_file_name not in os.listdir(): # if "config.json" exsits.....
 else: # Calls Normal Mode when "config.json" exists.
 ######* 3.1 Future Update: inside "config.json", a key would indicate if needed to update firmware and or packages. Then the function will be called depends.
     with open(config_file_name, "r") as config:
-        pass
-    
-    pass
+        dic = json.load(config)
+        ssid = dic["ssid"]
+        psd = dic["password"]
+        static_ip = dic["static_ip"]
+        is_static = False if static_ip == "" else True
+        
+###### 3.2 attempts to connect WIFI as a client with new infomation.
+    wifi=network.WLAN()
+    if all(
+                    [
+                        wifi.isconnected(),
+                        wifi.status() == 3,
+                        wifi.ifconfig()[0] != '0.0.0.0'
+                    ]
+            ):
+        
+        mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+    else:
+        wlan = wifi_connection(ssid, psd)
+    mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+    print(mac)
+#     
+ ###### 3.3 Transport data.
+
+
+
 
 

@@ -3,7 +3,9 @@ import sys
 import network
 import time
 import ubinascii
-static_ip = '192.168.1.99'
+
+
+static_ip = '192.168.1.98'
 
 
 
