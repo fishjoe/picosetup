@@ -35,6 +35,9 @@ config_file_name = "config.json" # *(you may change this value to what ever you 
 led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gpio would be onboard LED.
 #buzzer = machine.Pin(1, machine.Pin.OUT)  # example.
 
+url = "http://192.168.1.212:8000/picosetup" # This is variable made for 4.1, url used to update files.
+
+
 ###### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
 class Feedback: # feedback attribute may include print_string
     def __init__(self, print_string, blink_numbers, blink_length, blind_length, print_sep=" ", print_end= "\r", led_gpio = None, sould_gpio = None) -> None:
@@ -263,9 +266,8 @@ def wifi_connection(ssid, psd, isAp=False, isStatic=True, iptp=(static_ip, '255.
                 # for learning.
                 print("\nConnection Established")
                 try:
-                    print("Pinging an internal machine......", end="")
                     internal_result = ping(wifi.ifconfig()[3], quiet=True)[1]
-                    led_blink(4, 0.1, 0.1)
+                    Feedback(f"Pinging an internal machine......", 4, .1, .1).feedback()
                     print(internal_result, "/ 4  Done")
                     print("Pinging an external site......", end="")
                     external_result = ping("google.com", quiet=True)[1]
@@ -274,8 +276,7 @@ def wifi_connection(ssid, psd, isAp=False, isStatic=True, iptp=(static_ip, '255.
                     internal_result=external_result=0
                     pass
                 if internal_result * external_result == 0:
-                    print("Wifi not working,retry.....")
-                    led_blink(5, 1, 1)
+                    Feedback(f"Wifi not working,retry.....", 4, .1, .1).feedback()
                 else:
                     print("WIFI connection succesfull")
                     break
@@ -605,10 +606,21 @@ else: # Calls Normal Mode when "config.json" exists.
         wlan = wifi_connection(ssid, psd)
     mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
     print(mac)
-#     
- ###### 3.3 Transport data.
 
+####### 3.3 Transport data.
 
+####### 4. Testing if the remote server contains file for update.
+# url = "http://192.168.1.212:8000"
+
+def testing_url(url):
+    target_ip = url.split("//")[1].split(":")[0]
+    print(target_ip)
+    ping_result = ping(target_ip, quiet=True)
+    if int(ping_result[0])*int(ping_result[1])==0:
+        return False
+    
+
+testing_url(url)
 
 
 
