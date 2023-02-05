@@ -35,6 +35,8 @@ config_file_name = "config.json" # *(you may change this value to what ever you 
 led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gpio would be onboard LED.
 #buzzer = machine.Pin(1, machine.Pin.OUT)  # example.
 
+####### adinition control step by setting the reset_ready variable
+
 ###### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
 class Feedback: # feedback attribute may include print_string
     def __init__(self, print_string, blink_numbers, blink_length, blind_length, print_sep=" ", print_end= "\r", led_gpio = None, sould_gpio = None) -> None:
@@ -47,6 +49,7 @@ class Feedback: # feedback attribute may include print_string
         self.blink_length = blink_length # how long the led is on
         self.blind_length = blind_length # how long the led is off
         self.led_gpio.off()
+        self.reset_ready = False
         pass
 
 ###### 1.2.1 methods to overall generate feedback. you may call _Feedback(st,qty,on,off).feedback_ . 
@@ -565,22 +568,18 @@ if config_file_name not in os.listdir(): # if "config.json" exsits.....
 
 ###### This following function will return the above key info. function is at ###### 1.2.3 (serch keyword 1.2.3)
     page = WebPage(server, default_page, ssid = "", password = "", static_ip = "Leave Empty for DHCP")
-    returnvalue = page.webpage()
+    returnvalue = page.webpage() # values returned from processing the web request. Will be saved into json file.
     print(returnvalue[0])
-    update_config(returnvalue[0])
-    reset_feedback = Feedback(f"Reset in 5 Secs", 5, .2, .8)
-    reset_feedback.feedback()
-    
 
 ######* 2.3 Save the infomation into "config.json" and restart the machine.
+    update_config(returnvalue[0])  # use 1.2.5 function at line 211
+    reset_feedback = Feedback(f"Reset in 5 Secs", 5, .2, .8)
+    reset_feedback.feedback()
+    # if reset_feedback.reset_ready == True:
+    machine.reset()
 
 
-
-
-        
-
-    
-#####3. **Normal Mode:** connect to wifi
+###### 3. **Normal Mode:** connect to wifi
 else: # Calls Normal Mode when "config.json" exists.
 ######* 3.1 Future Update: inside "config.json", a key would indicate if needed to update firmware and or packages. Then the function will be called depends.
     with open(config_file_name, "r") as config:
