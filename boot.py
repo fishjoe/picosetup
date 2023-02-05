@@ -5,7 +5,7 @@ import time
 import ubinascii
 
 
-static_ip = '192.168.1.97'
+static_ip = '192.168.1.96'
 
 
 
