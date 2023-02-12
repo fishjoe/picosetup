@@ -250,9 +250,9 @@ def wifi_connection(ssid, psd, isAp=False, isStatic=True, iptp=(static_ip, '255.
             if count_on_attempts == 10:
                 Feedback(f"too many fails, please check settings or repair corrupted file", 10 , .2, .3).feedback()
                 sys.exit()
-#             print(count_on_attempts, "attempts")
-#             print("network.status()code : ", wifi.status())
-#             print("network.isconnected() : ", wifi.isconnected())
+            #print(count_on_attempts, "attempts")
+            #print("network.status()code : ", wifi.status())
+            #print("network.isconnected() : ", wifi.isconnected())
             print(".", end="", sep="")
             time.sleep(0.5)
             Feedback(f"too many fails, please check settings or repair corrupted file", count_on_attempts , .2, .3).feedback()
