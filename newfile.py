@@ -35,12 +35,8 @@ config_file_name = "config.json" # *(you may change this value to what ever you 
 led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gpio would be onboard LED.
 #buzzer = machine.Pin(1, machine.Pin.OUT)  # example.
 
-<<<<<<< HEAD
 ####### adinition control step by setting the reset_ready variable
-=======
 url = "http://192.168.1.212:8000/picosetup" # This is variable made for 4.1, url used to update files.
-
->>>>>>> a26c7353594f0e6da0a1067cc1d5049a8102a30d
 
 ###### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
 class Feedback: # feedback attribute may include print_string
