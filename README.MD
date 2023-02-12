@@ -13,7 +13,7 @@ import json
 
 ###### TODO   Next update would inlude function to check update for package. 
 
-##### This is a universal Setup *boot.py* file, designed for Raspberry Pi Pico(refered as Pico later). You maybe able to use this on other board but I'm not sure.
+###### This is a universal Setup *boot.py* file, designed for Raspberry Pi Pico(refered as Pico later). You maybe able to use this on other board but I'm not sure.
 ###### NOTE 1.2.3.4 For some apps which may create http-requests and send key-value chains to webpage, this function may help on processing such key-value chains.
 ###### such key-value chains may help on setting up the initial page without really seeing the page. a good example of this app is _**iOS Shortcuts**_, 
 ###### this setup templete fully support such functionnality.
@@ -24,8 +24,8 @@ import json
 
 
 
-####Functions it will do at start up:
-#####1. **Initial Check:** 
+#### Functions it will do at start up:
+##### 1. **Initial Check:** 
 ###### It will check if wifi was set up, by checking the existence of configfile called "config.json" --> if yes --> 3. **Normal Mode** else 2. **Access Point Mode**
 static_ip = '192.168.1.98'
 config_file_name = "config.json" # *(you may change this value to what ever you want.)*
