@@ -13,7 +13,7 @@ import json
 
 ###### TODO   Next update would inlude function to check update for package. 
 
-#####This is a universal Setup *boot.py* file, designed for Raspberry Pi Pico(refered as Pico later). You maybe able to use this on other board but I'm not sure.
+##### This is a universal Setup *boot.py* file, designed for Raspberry Pi Pico(refered as Pico later). You maybe able to use this on other board but I'm not sure.
 ###### NOTE 1.2.3.4 For some apps which may create http-requests and send key-value chains to webpage, this function may help on processing such key-value chains.
 ###### such key-value chains may help on setting up the initial page without really seeing the page. a good example of this app is _**iOS Shortcuts**_, 
 ###### this setup templete fully support such functionnality.
