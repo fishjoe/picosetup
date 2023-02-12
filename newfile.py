@@ -2,14 +2,16 @@
 ##### Virsion 1.1 
 ###### Both boot.py and README.MD are same files with different names. Thanks to MD format which I use ##### to format the readme file and comment in the real code. To use this template, you may simply copy the code into your own boot.py and flash it onto the board. It is reccomanded to name the file into _temp.py_ and run it before you impletement boot.py so it will not cause problem.
 ###### Modules Needed
-import os
-import sys
-import network
-import time
-import ubinascii
-import machine
-import socket
-import json
+mdfilemode = False
+if mdfilemode == False:
+    import os
+    import sys
+    import network
+    import time
+    import ubinascii
+    import machine
+    import socket
+    import json
 
 ###### TODO   Next update would inlude function to check update for package. 
 
@@ -27,16 +29,16 @@ import json
 #### Functions it will do at start up:
 ##### 1. **Initial Check:** 
 ###### It will check if wifi was set up, by checking the existence of configfile called "config.json" --> if yes --> 3. **Normal Mode** else 2. **Access Point Mode**
-static_ip = '192.168.1.98'
-config_file_name = "config.json" # *(you may change this value to what ever you want.)*
+    static_ip = '192.168.1.98'
+    config_file_name = "config.json" # *(you may change this value to what ever you want.)*
 
 ##### 1.1 It will also create essential objects and functions as a part of UI indication, especially when Pico is not connected to computer.
 
-led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gpio would be onboard LED.
+    led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gpio would be onboard LED.
 #buzzer = machine.Pin(1, machine.Pin.OUT)  # example.
 
 ####### adinition control step by setting the reset_ready variable
-url = "http://192.168.1.212:8000/picosetup" # This is variable made for 4.1, url used to update files.
+    url = "http://192.168.1.212:8000/picosetup" # This is variable made for 4.1, url used to update files.
 
 ##### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
 class Feedback: # feedback attribute may include print_string
