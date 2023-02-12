@@ -1,5 +1,5 @@
 # Micropython Device Setup Template
-###### Virsion 1.1 
+##### Virsion 1.1 
 ###### Both boot.py and README.MD are same files with different names. Thanks to MD format which I use ##### to format the readme file and comment in the real code. To use this template, you may simply copy the code into your own boot.py and flash it onto the board. It is reccomanded to name the file into _temp.py_ and run it before you impletement boot.py so it will not cause problem.
 ###### Modules Needed
 import os
@@ -30,7 +30,7 @@ import json
 static_ip = '192.168.1.98'
 config_file_name = "config.json" # *(you may change this value to what ever you want.)*
 
-###### 1.1 It will also create essential objects and functions as a part of UI indication, especially when Pico is not connected to computer.
+##### 1.1 It will also create essential objects and functions as a part of UI indication, especially when Pico is not connected to computer.
 
 led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gpio would be onboard LED.
 #buzzer = machine.Pin(1, machine.Pin.OUT)  # example.
@@ -38,7 +38,7 @@ led_gpio = machine.Pin('LED', machine.Pin.OUT) # example only, by default led_gp
 ####### adinition control step by setting the reset_ready variable
 url = "http://192.168.1.212:8000/picosetup" # This is variable made for 4.1, url used to update files.
 
-###### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
+##### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
 class Feedback: # feedback attribute may include print_string
     def __init__(self, print_string, blink_numbers, blink_length, blind_length, print_sep=" ", print_end= "\r", led_gpio = None, sould_gpio = None) -> None:
         self.led_gpio = led_gpio if led_gpio else machine.Pin('LED', machine.Pin.OUT) # Default feedback led is onboard led however you may connect other devices as feedback.
@@ -162,9 +162,9 @@ class WebPage:
     
 ###### 1.2.3.5 method to host the page.
     def webpage(self):
-    ###### 1.2.3.4.1 load the default_page, create feedback instance.
+###### 1.2.3.4.1 load the default_page, create feedback instance.
         html = self.html
-    ###### 1.2.3.4.2 create socket connection
+###### 1.2.3.4.2 create socket connection
         host = socket.getaddrinfo(server, 80)[0][-1]
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -558,7 +558,7 @@ if config_file_name not in os.listdir(): # if "config.json" exsits.....
 </body>
 </html>
 '''
-######* The page will determine the following values:
+###### The page will determine the following values:
 
     ssid = ""   
     password = ""
