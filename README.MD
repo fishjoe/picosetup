@@ -143,7 +143,7 @@ class WebPage:
             return regex.split(strr)
         keydic = {}
         keylist = self.kwargs.keys()
-#         print([key for key in keylist])
+        #print([key for key in keylist])
         li = UTF8_decoded_request_str.split("\n")
         rgx = "web_key_|:| |\'|\""
         for line in li:
@@ -152,13 +152,13 @@ class WebPage:
                 key, value, *_ = [i for i in re_split(second_half_line, rgx) if i != ""]
                 keydic[key] = value
             elif ":" in line and any(key in line.split(":")[0] for key in self.kwargs.keys()): # condition any of items.keys in kwargs exist
-#                 key, value, *_ = line.split(" |:")
+                #key, value, *_ = line.split(" |:")
                 pair = line.split(":")
                 pair = [i.strip().replace("\r", "") for i in pair]
                 print(pair)
                 key, value = pair[0].lower(), pair[1]
-#                 print(f"this line -------- {line}")
-#                 print(line.split(":"))
+                #print(f"this line -------- {line}")
+                #print(line.split(":"))
                 keydic[key] = value
             else:
                 pass
