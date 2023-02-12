@@ -4,6 +4,8 @@
 ###### Modules Needed
 mdfilemode = False
 if mdfilemode == False:
+
+
     import os
     import sys
     import network
@@ -41,54 +43,55 @@ if mdfilemode == False:
     url = "http://192.168.1.212:8000/picosetup" # This is variable made for 4.1, url used to update files.
 
 ##### 1.2 A class of Feedback is created to overall manage the feedback actions at different stages, including led-blinks, Printout to screen.
-class Feedback: # feedback attribute may include print_string
-    def __init__(self, print_string, blink_numbers, blink_length, blind_length, print_sep=" ", print_end= "\r", led_gpio = None, sould_gpio = None) -> None:
-        self.led_gpio = led_gpio if led_gpio else machine.Pin('LED', machine.Pin.OUT) # Default feedback led is onboard led however you may connect other devices as feedback.
-        self.sound_gpio = sould_gpio # By default feedback sound is not active.
-        self.print_string = print_string # message to return to user.
-        self.print_end = print_end
-        self.print_sep = print_sep
-        self.blink_numbers = blink_numbers # how many blinks needed as indication.
-        self.blink_length = blink_length # how long the led is on
-        self.blind_length = blind_length # how long the led is off
-        self.led_gpio.off()
-        self.reset_ready = False
-        pass
+
+    class Feedback: # feedback attribute may include print_string
+        def __init__(self, print_string, blink_numbers, blink_length, blind_length, print_sep=" ", print_end= "\r", led_gpio = None, sould_gpio = None) -> None:
+            self.led_gpio = led_gpio if led_gpio else machine.Pin('LED', machine.Pin.OUT) # Default feedback led is onboard led however you may connect other devices as feedback.
+            self.sound_gpio = sould_gpio # By default feedback sound is not active.
+            self.print_string = print_string # message to return to user.
+            self.print_end = print_end
+            self.print_sep = print_sep
+            self.blink_numbers = blink_numbers # how many blinks needed as indication.
+            self.blink_length = blink_length # how long the led is on
+            self.blind_length = blind_length # how long the led is off
+            self.led_gpio.off()
+            self.reset_ready = False
+            pass
 
 ###### 1.2.1 methods to overall generate feedback. you may call _Feedback(st,qty,on,off).feedback_ . 
-    def feedback(self):
-        self.led_blink()
-        self.print_feedback()
+        def feedback(self):
+            self.led_blink()
+            self.print_feedback()
 
 ###### 1.2.2 blink the onboard led for _self.blink_numbers_ of times, each blink turns on the LED lasting of self.blink_length seconds, with self.blind_length seconds gap. 
-    def led_blink(self):
-        led = self.led_gpio
-        if self.blink_numbers==self.blind_length==self.blink_length==0:
-            led.toggle()
-        elif led.value() == 0:
-            for i in range(self.blink_numbers):
-                led.on()
-                time.sleep(self.blink_length)
-                led.off()
-                time.sleep(self.blind_length)
-        else:
-            for i in range(self.blink_numbers):
-                led.off()
-                time.sleep(self.blind_length)
-                led.on()
-                time.sleep(self.blind_length)
-                
-    def value(self):
-        return self.led_gpio.value()
+        def led_blink(self):
+            led = self.led_gpio
+            if self.blink_numbers==self.blind_length==self.blink_length==0:
+                led.toggle()
+            elif led.value() == 0:
+                for i in range(self.blink_numbers):
+                    led.on()
+                    time.sleep(self.blink_length)
+                    led.off()
+                    time.sleep(self.blind_length)
+            else:
+                for i in range(self.blink_numbers):
+                    led.off()
+                    time.sleep(self.blind_length)
+                    led.on()
+                    time.sleep(self.blind_length)
+                    
+        def value(self):
+            return self.led_gpio.value()
 
-    def sound(self):
-        # currently nothing happens as with sound.
-        pass
+        def sound(self):
+            # currently nothing happens as with sound.
+            pass
 
-    def print_feedback(self):
-        # may improve later.
-        print(self.print_string, sep = self.print_sep, end= self.print_end)
-        pass
+        def print_feedback(self):
+            # may improve later.
+            print(self.print_string, sep = self.print_sep, end= self.print_end)
+            pass
 
 ###### 1.2.2.1 TODO instances of feedback methods.
 
